@@ -39,7 +39,8 @@ namespace Amplitude.Helpers
 
         public void AddToQueue(SoundClip source);
 
-        public void Play(SoundClip source);
+        public void Play(SoundClip source, float pitch = 0f, int tempo = 0);
+        public void Play(string fileName, int volume, int volumeMultiplier, string playerDeviceName, bool loopClip, string? name = null, float pitch = 0f, int tempo = 0);
 
         public void CheckDeviceExistsAndGenerateErrors(OutputProfile outputProfile);
 

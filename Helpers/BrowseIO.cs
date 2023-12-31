@@ -39,7 +39,7 @@ namespace Amplitude.Helpers
         private static FileDialogFilter _audioFileTypesFilter = new FileDialogFilter
         {
             Name = "Audio file",
-            Extensions = { "aac", "aiff", "alac", "flac", "m4a", "mp3", "mp4", "ogg", "opus", "wav" }
+            Extensions = { "aac", "aiff", "alac", "flac", "m4a", "mp3", "mp4", "ogg", "opus", "wav", "vsnd_c" }
         };
         public static FileDialogFilter AudioFileTypesFilter
         {

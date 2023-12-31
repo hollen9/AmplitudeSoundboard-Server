@@ -340,21 +340,21 @@ namespace Amplitude.Helpers
         {
             if (ErrorListWindowOpen)
             {
-                if (ErrorListWindow.WindowState == WindowState.Minimized)
-                {
-                    ErrorListWindow.WindowState = WindowState.Normal;
-                }
-                ErrorListWindow.Activate();
+                //if (ErrorListWindow.WindowState == WindowState.Minimized)
+                //{
+                //    ErrorListWindow.WindowState = WindowState.Normal;
+                //}
+                //ErrorListWindow.Activate();
             }
             else
             {
                 ErrorListWindowOpen = true;
-                if (desiredPosition != null)
-                {
-                    ErrorListWindow.Position = (PixelPoint)desiredPosition;
-                }
+                //if (desiredPosition != null)
+                //{
+                //    ErrorListWindow.Position = (PixelPoint)desiredPosition;
+                //}
                 ErrorListWindow.Show();
-                ErrorListWindow.Activate();
+                // ErrorListWindow.Activate();
             }
         }
 

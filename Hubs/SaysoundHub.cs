@@ -1,4 +1,4 @@
-/*
+﻿/*
     AmplitudeSoundboard
     Copyright (C) 2021-2023 dan0v
     https://git.dan0v.com/AmplitudeSoundboard
@@ -19,27 +19,29 @@
     along with AmplitudeSoundboard.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-using Avalonia;
-using Avalonia.ReactiveUI;
-using System.Net.NetworkInformation;
+using Amplitude.Models;
+using AmplitudeSoundboard;
+using Microsoft.AspNetCore.SignalR;
+using System.Threading.Tasks;
 
-namespace AmplitudeSoundboard
+namespace Amplitude.Hubs
 {
-    class Program
+    public class SaysoundHub : Hub
     {
-        // Initialization code. Don't use any Avalonia, third-party APIs or any
-        // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
-        // yet and stuff might break.
-        public static void Main(string[] args)
+        public async Task SendMessage(string user, string message, string fullpath, float pitch = 0f, int volume = 100, int tempo = 0)
         {
-            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args, Avalonia.Controls.ShutdownMode.OnMainWindowClose);
+            var sc = new SoundClip();
+            sc.AudioFilePath = fullpath;
+            sc.OutputProfileId = "DEFAULT";
+            sc.Volume = volume;
+            App.SoundEngine.Play(sc, pitch, tempo);
+            //App.SoundEngine.Play(fullpath, 100, 100, "Default", false);
+            // await Clients.All.SendAsync("ReceiveMessage", user, message);
         }
 
-        // Avalonia configuration, don't remove; also used by visual designer.
-        public static AppBuilder BuildAvaloniaApp()
-            => AppBuilder.Configure<App>()
-                .UsePlatformDetect()
-                .LogToTrace()
-                .UseReactiveUI();
+        public void StopAllAudio()
+        {
+            App.SoundEngine.Reset();
+        }
     }
 }

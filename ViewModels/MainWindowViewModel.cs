@@ -24,10 +24,22 @@ using Amplitude.Models;
 using System.Collections.ObjectModel;
 using System.Linq;
 
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Hosting;
+using System.Threading.Tasks;
+using Amplitude.Hubs;
+
+
+
 namespace Amplitude.ViewModels
 {
     public sealed class MainWindowViewModel : ViewModelBase
     {
+        public IHost Host { get; set; }
+
 
         public (int x, int y) WindowPosition = (0, 0);
 
@@ -90,6 +102,21 @@ namespace Amplitude.ViewModels
         private ObservableCollection<GridItemRow> _gridItemsRows = new();
         private ObservableCollection<GridItemRow> GridItemsRows { get => _gridItemsRows; }
 
+        public string ServerStatus
+        {
+            get
+            {
+                if (Host != null)
+                {
+                    return "On";//Localization.Localizer.Instance["ServerRunning"];
+                }
+                else
+                {
+                    return "Off";//Localization.Localizer.Instance["ServerStopped"];
+                }
+            }
+        }
+
         public void ShowList()
         {
             WindowManager.ShowSoundClipListWindow(new Avalonia.PixelPoint(WindowPosition.x + 200, WindowPosition.y + 200));
@@ -103,6 +130,35 @@ namespace Amplitude.ViewModels
         public void ShowAbout()
         {
             WindowManager.ShowAboutWindow(new Avalonia.PixelPoint(WindowPosition.x + 100, WindowPosition.y + 100));
+        }
+
+        public async Task ServerStart()
+        {
+            Host?.Dispose();
+            Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
+                .ConfigureWebHostDefaults(webBuilder => webBuilder
+                    .UseUrls("http://localhost:53353")
+                    .ConfigureServices(services => services.AddSignalR())
+                    .Configure(app =>
+                    {
+                        app.UseRouting();
+                        app.UseEndpoints(endpoints => endpoints.MapHub<SaysoundHub>("/saysoundHub"));
+                    }))
+               .Build();
+
+            await Host.StartAsync();
+            OnPropertyChanged(nameof(ServerStatus));
+        }
+
+        public async Task ServerStop()
+        {
+            if (Host != null)
+            {
+                await Host.StopAsync();
+                Host.Dispose();
+                Host = null;
+                OnPropertyChanged(nameof(ServerStatus));
+            }
         }
 
         public void StopAudio()

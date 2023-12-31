@@ -22,6 +22,7 @@
 using Amplitude.ViewModels;
 using AmplitudeSoundboard;
 using Avalonia.Controls;
+
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 

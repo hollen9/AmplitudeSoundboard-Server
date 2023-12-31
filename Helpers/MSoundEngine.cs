@@ -21,7 +21,9 @@
 
 using Amplitude.Models;
 using AmplitudeSoundboard;
+using Avalonia.Logging;
 using ManagedBass;
+using ManagedBass.Fx;
 using ManagedBass.Mix;
 using System;
 using System.Collections.Generic;
@@ -157,7 +159,7 @@ namespace Amplitude.Helpers
             }
         }
 
-        public void Play(SoundClip source)
+        public void Play(SoundClip source, float pitch = 0f, int tempo = 0)
         {
             if (!BrowseIO.ValidAudioFile(source.AudioFilePath, true, source))
             {
@@ -166,11 +168,11 @@ namespace Amplitude.Helpers
 
             foreach (OutputSettings settings in source.OutputSettingsFromProfile)
             {
-                Play(source.AudioFilePath, settings.Volume, source.Volume, settings.DeviceName, source.LoopClip, source.Name);
+                Play(source.AudioFilePath, settings.Volume, source.Volume, settings.DeviceName, source.LoopClip, source.Name, pitch, tempo);
             }
         }
 
-        private void Play(string fileName, int volume, int volumeMultiplier, string playerDeviceName, bool loopClip, string? name = null)
+        public void Play(string fileName, int volume, int volumeMultiplier, string playerDeviceName, bool loopClip, string? name = null, float pitch = 0f, int tempo = 0)
         {
             double vol = (volume / 100.0) * (volumeMultiplier / 100.0);
 
@@ -191,27 +193,64 @@ namespace Amplitude.Helpers
                 if (Bass.Init(devId.Value, SAMPLE_RATE) || Bass.LastError == Errors.Already)
                 {
                     Bass.CurrentDevice = devId.Value;
-                    int mixer = BassMix.CreateMixerStream(SAMPLE_RATE, 2, BassFlags.Default);
-                    int stream = Bass.CreateStream(fileName);
+                    int mixerChannelHandle = BassMix.CreateMixerStream(SAMPLE_RATE, 2, BassFlags.Default);
+                    int streamChannelHandle = Bass.CreateStream(fileName, Flags: BassFlags.Decode);
+                    
+                    //if (!Bass.ChannelSetAttribute(streamChannelHandle, ChannelAttribute.Volume, vol))
+                    //{
+                    //    App.WindowManager.ShowErrorString($"Volume: {Bass.LastError}");
+                    //}
 
-                    Bass.ChannelSetAttribute(stream, ChannelAttribute.Volume, vol);
-                    BassMix.MixerAddChannel(mixer, stream, BassFlags.AutoFree | BassFlags.MixerChanDownMix);
-                    Bass.ChannelPlay(mixer);
 
-                    if (stream != 0)
+                    int stream_fx_tempo = BassFx.TempoCreate(streamChannelHandle, BassFlags.FxFreeSource | BassFlags.Decode);
+                    if (!Bass.ChannelSetAttribute(stream_fx_tempo, ChannelAttribute.Pitch, pitch))
+                    {
+                        App.WindowManager.ShowErrorString($"TempoFx Pitch: {Bass.LastError}");
+                    }
+                    if (!Bass.ChannelSetAttribute(stream_fx_tempo, ChannelAttribute.Volume, vol))
+                    {
+                        App.WindowManager.ShowErrorString($"Volume: {Bass.LastError}");
+                    }
+
+                    // speed up or down based on pitch
+                    if (tempo != 0)
+                    {
+                        if (!Bass.ChannelSetAttribute(stream_fx_tempo, ChannelAttribute.Tempo, tempo))
+                        {
+                            App.WindowManager.ShowErrorString($"TempoFx Tempo: {Bass.LastError}");
+                        }
+                    }
+
+
+
+                    //if (pitch != 0f)
+                    //{
+                    //    if (!Bass.ChannelSetAttribute(streamChannelHandle, ChannelAttribute.Pitch, pitch))
+                    //    {
+                    //        App.WindowManager.ShowErrorString($"Pitch: {Bass.LastError}");
+                    //    }
+
+                    //}
+
+
+                    BassMix.MixerAddChannel(mixerChannelHandle, stream_fx_tempo, BassFlags.AutoFree | BassFlags.MixerChanDownMix);
+                    Bass.ChannelPlay(mixerChannelHandle);
+                    
+
+                    if (stream_fx_tempo != 0)
                     {
                         // Track active streams so they can be stopped
                         try
                         {
-                            var len = Bass.ChannelGetLength(stream, PositionFlags.Bytes);
-                            double length = Bass.ChannelBytes2Seconds(stream, len);
-                            PlayingClip track = new PlayingClip(name ?? Path.GetFileNameWithoutExtension(fileName) ?? "", playerDeviceName, stream, length, loopClip);
-
+                            var len = Bass.ChannelGetLength(stream_fx_tempo, PositionFlags.Bytes);
+                            double length = Bass.ChannelBytes2Seconds(stream_fx_tempo, len);
+                            PlayingClip track = new PlayingClip(name ?? Path.GetFileNameWithoutExtension(fileName) ?? "", playerDeviceName, stream_fx_tempo, length, loopClip);
+                            
                             lock(currentlyPlayingLock)
                             {
                                 CurrentlyPlaying.Add(track);
                             }
-                            Bass.ChannelPlay(stream, false);
+                            Bass.ChannelPlay(stream_fx_tempo, false);
                         }
                         catch(Exception e)
                         {
