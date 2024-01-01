@@ -28,12 +28,27 @@ namespace Amplitude.Hubs
 {
     public class SaysoundHub : Hub
     {
-        public async Task SendMessage(string user, string message, string fullpath, float pitch = 0f, int volume = 100, int tempo = 0)
+        public async Task SendMessage(string user, string message, string fullpath, float pitch = 0f, int volume = 100, int tempo = 0, bool isExclusiveMusic = false)
         {
             var sc = new SoundClip();
             sc.AudioFilePath = fullpath;
             sc.OutputProfileId = "DEFAULT";
             sc.Volume = volume;
+            sc.IsExclusiveMusic = isExclusiveMusic;
+
+            if (isExclusiveMusic) 
+            {
+                // Stop all other music
+                for (int i = App.SoundEngine.CurrentlyPlaying.Count - 1; i >= 0; i--)
+                {
+                    var clip = App.SoundEngine.CurrentlyPlaying[i];
+                    if (clip.IsExclusiveMusic)
+                    {
+                        clip.StopPlayback();
+                    }
+                }
+            }
+
             App.SoundEngine.Play(sc, pitch, tempo);
             //App.SoundEngine.Play(fullpath, 100, 100, "Default", false);
             // await Clients.All.SendAsync("ReceiveMessage", user, message);
@@ -42,6 +57,30 @@ namespace Amplitude.Hubs
         public void StopAllAudio()
         {
             App.SoundEngine.Reset();
+        }
+
+        public void StopAudioWithNameCritia(string criteria)
+        {
+            for (int i = App.SoundEngine.CurrentlyPlaying.Count - 1; i >= 0; i--)
+            {
+                var clip = App.SoundEngine.CurrentlyPlaying[i];
+                if (clip.Name.Contains(criteria))
+                {
+                    clip.StopPlayback();
+                }
+            }
+        }
+
+        public void StopExclusiveMusic()
+        {
+            for (int i = App.SoundEngine.CurrentlyPlaying.Count - 1; i >= 0; i--)
+            {
+                var clip = App.SoundEngine.CurrentlyPlaying[i];
+                if (clip.IsExclusiveMusic)
+                {
+                    clip.StopPlayback();
+                }
+            }
         }
     }
 }

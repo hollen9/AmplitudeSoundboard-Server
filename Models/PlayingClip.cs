@@ -36,6 +36,20 @@ namespace Amplitude.Models
 
         public string ToolTip => $"{Name} - {OutputDevice}";
 
+        private bool _isExclusiveMusic = false;
+        public bool IsExclusiveMusic
+        {
+            get => _isExclusiveMusic;
+            set
+            {
+                if (value !=  _isExclusiveMusic) 
+                {
+                    _isExclusiveMusic = value;
+                    OnPropertyChanged(nameof(IsExclusiveMusic));
+                }
+            }
+        }
+
         private double _currentPos = 0;
         public double CurrentPos
         {

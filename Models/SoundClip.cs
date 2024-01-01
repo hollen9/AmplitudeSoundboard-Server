@@ -149,6 +149,20 @@ namespace Amplitude.Models
             }
         }
 
+        private bool _isExclusiveMusic = false;
+        public bool IsExclusiveMusic
+        {
+            get => _isExclusiveMusic;
+            set
+            {
+                if (value != _isExclusiveMusic)
+                {
+                    _isExclusiveMusic = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         private ObservableCollection<OutputSettings> _outputSettingsFromProfile = new ObservableCollection<OutputSettings>();
         [JsonIgnore]
         public ObservableCollection<OutputSettings> OutputSettingsFromProfile => App.OutputProfileManager.GetOutputProfile(OutputProfileId)?.OutputSettings;
