@@ -219,6 +219,28 @@
               <CheckBox Grid.Column="1" HorizontalAlignment="Center" Margin="5,0,5,0" VerticalAlignment="Center" IsChecked="{Binding Model.HideTutorial}" Cursor="Hand"/>
             </Grid>
           </Border>
+						
+					<!--SignalR Settings-->
+				<Border BorderThickness="2" CornerRadius="5" Margin="5" Padding="5">
+						<Border.BorderBrush>
+								<SolidColorBrush Color="{Binding ThemeHandler.BorderColor}"/>
+						</Border.BorderBrush>
+						<StackPanel>
+								<Label Content="{i18n:Localize SignalRSettingsLabel}" HorizontalAlignment="Center" Height="30"></Label>
+
+								<Grid ColumnDefinitions="*,Auto">
+										<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+												<!--<Label Content="{i18n:Localize SignalRServerLabel}" VerticalAlignment="Center"></Label>-->
+												<Label Content="SignalR Server Port" VerticalAlignment="Center"></Label>
+												<Panel>
+														<Image Height="20" VerticalAlignment="Center" />
+												</Panel>
+										</StackPanel>
+										<TextBox Grid.Column="1" Margin="0,5,0,5" Text="{Binding Model.ServerPort}" HorizontalAlignment="Center"></TextBox>
+								</Grid>
+						</StackPanel>
+				</Border>
+									
           
           <!--Save button-->
           <Grid ColumnDefinitions="*,Auto">

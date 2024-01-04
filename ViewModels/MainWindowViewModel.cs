@@ -28,9 +28,15 @@ using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
 using Amplitude.Hubs;
+using System;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.Extensions.Options;
 
 
 
@@ -108,7 +114,7 @@ namespace Amplitude.ViewModels
             {
                 if (Host != null)
                 {
-                    return "On";//Localization.Localizer.Instance["ServerRunning"];
+                    return "On @Port: " + OptionsManager.Instance.Options.ServerPort;//Localization.Localizer.Instance["ServerRunning"];
                 }
                 else
                 {
@@ -137,12 +143,91 @@ namespace Amplitude.ViewModels
             Host?.Dispose();
             Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
                 .ConfigureWebHostDefaults(webBuilder => webBuilder
-                    .UseUrls("http://localhost:53353")
-                    .ConfigureServices(services => services.AddSignalR())
+                    .UseUrls("http://localhost:" + OptionsManager.Instance.Options.ServerPort)
+                    .ConfigureServices(services =>
+                        {
+
+                            services.AddAuthentication(opt =>
+                            {
+                                opt.DefaultAuthenticateScheme = HubTokenAuthenticationDefaults.AuthenticationScheme;
+                                opt.DefaultChallengeScheme = HubTokenAuthenticationDefaults.AuthenticationScheme;
+                            }).AddHubTokenAuthenticationScheme();
+
+                            services.AddAuthorization(options =>
+                            {
+                                options.AddPolicy("SignalRPolicy", pol => pol.Requirements.Add(new HubRequirement()));
+                            });
+
+                            services.AddSignalR(opt => 
+                            {
+#if DEBUG
+                                opt.EnableDetailedErrors = true;
+#endif
+                            });
+                            //services.AddAuthentication(options =>
+                            //{
+                            //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                            //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                            //}).AddJwtBearer(options => 
+                            //{
+                            //    options.RequireHttpsMetadata = false;
+                            //    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                            //    {
+                            //        ValidateIssuer = false,
+                            //        //ValidIssuer = "AmplitudeSoundboardServer",
+                            //        ValidateAudience = false,
+                            //        // ValidAudience = "AmplitudeSoundboardClient",
+                            //        ValidateLifetime = false, // 永久有效
+                            //        ClockSkew = TimeSpan.Zero, // 時間偏移
+                            //        ValidateIssuerSigningKey = true,
+                            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("wakka5353wakkaop")), // 金鑰
+
+                            //    };
+                            //    options.Events = new JwtBearerEvents
+                            //    {
+                            //        OnMessageReceived = context =>
+                            //        {
+                            //            // Extract accessToken from Header (Bearer)
+                            //            var accessToken = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+                            //            var path = context.HttpContext.Request.Path;
+                            //            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/hubs")))
+                            //            {
+                            //                context.Token = accessToken;
+                            //            }
+                            //            return Task.CompletedTask;
+                            //        },
+                            //        OnAuthenticationFailed = context =>
+                            //        {
+                            //            var te = context.Exception;
+                            //            return Task.CompletedTask;
+                            //        },
+                            //        OnChallenge = context =>
+                            //        {
+
+                            //            var te = context.AuthenticateFailure;
+                            //            return Task.CompletedTask;
+                            //        },
+                            //        OnForbidden = context =>
+                            //        {
+                            //            var te = context.Result;
+                            //            return Task.CompletedTask;
+                            //        },
+                            //    };
+                            //});
+                        }
+                        )
                     .Configure(app =>
                     {
                         app.UseRouting();
-                        app.UseEndpoints(endpoints => endpoints.MapHub<SaysoundHub>("/saysoundHub"));
+                        
+                        app.UseAuthentication();
+                        app.UseAuthorization();
+
+                        app.UseEndpoints(endpoints => 
+                        {
+                            endpoints.MapHub<SaysoundHub>("/hubs/saysoundHub",
+                                options => options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets);
+                        });
                     }))
                .Build();
 

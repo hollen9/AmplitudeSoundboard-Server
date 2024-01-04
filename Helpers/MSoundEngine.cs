@@ -51,6 +51,7 @@ namespace Amplitude.Helpers
 
 
         private const long TIMER_MS = 200;
+        
         private Timer timer = new Timer(TIMER_MS)
         {
             AutoReset = true,
@@ -70,7 +71,12 @@ namespace Amplitude.Helpers
                     if (t.LoopClip)
                     {
                         t.CurrentPos = 0;
-                        Bass.ChannelPlay(t.BassStreamId, false);
+                        // Bass.ChannelPlay(t.BassStreamId, false);
+                        /// We need to re-add the track to the list, because the sound won't loop due to the introdution of
+                        /// BassFx TempoCreate. This is a workaround. The original code is commented out above.
+                        CurrentlyPlaying.Remove(t);
+                        this.Play(t.FilePath, t.RawVolume, t.OutputVolumeMultiplier, t.OutputDeviceName, t.LoopClip, t.Name, t.Pitch, t.Tempo, t.IsExclusiveMusic);
+                        
                     }
                     else
                     {
@@ -245,7 +251,14 @@ namespace Amplitude.Helpers
                             var len = Bass.ChannelGetLength(stream_fx_tempo, PositionFlags.Bytes);
                             double length = Bass.ChannelBytes2Seconds(stream_fx_tempo, len);
                             PlayingClip track = new PlayingClip(name ?? Path.GetFileNameWithoutExtension(fileName) ?? "", playerDeviceName, stream_fx_tempo, length, loopClip);
+                            
                             track.IsExclusiveMusic = isExclusiveMusic;
+                            track.Pitch = pitch;
+                            track.Tempo = tempo;
+                            track.RawVolume = volume;
+                            track.FilePath = fileName;
+                            track.OutputDeviceName = playerDeviceName;
+                            track.OutputVolumeMultiplier = volumeMultiplier;
                             
                             lock(currentlyPlayingLock)
                             {

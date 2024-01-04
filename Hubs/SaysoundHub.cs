@@ -21,20 +21,26 @@
 
 using Amplitude.Models;
 using AmplitudeSoundboard;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Amplitude.Hubs
 {
+    [Authorize("SignalRPolicy")]
     public class SaysoundHub : Hub
     {
-        public async Task SendMessage(string user, string message, string fullpath, float pitch = 0f, int volume = 100, int tempo = 0, bool isExclusiveMusic = false)
+        public async Task SendMessage(string user, string message, string fullpath, float pitch = 0f, int volume = 100, int tempo = 0, bool isExclusiveMusic = false, bool isLoop = false)
         {
             var sc = new SoundClip();
+            sc.Name = user + ":" + Path.GetFileName(fullpath);
             sc.AudioFilePath = fullpath;
             sc.OutputProfileId = "DEFAULT";
             sc.Volume = volume;
             sc.IsExclusiveMusic = isExclusiveMusic;
+            sc.LoopClip = isLoop;
 
             if (isExclusiveMusic) 
             {

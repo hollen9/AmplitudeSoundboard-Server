@@ -29,6 +29,44 @@ namespace Amplitude.Models
 {
     public class Options : INotifyPropertyChanged
     {
+        /// <summary>
+        /// SetProperty
+        /// </summary>
+        private void SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            if (field == null || !field.Equals(value))
+            {
+                field = value;
+                OnPropertyChanged(propertyName);
+            }
+        }
+
+
+
+        public const int DEFAULT_SERVER_PORT = 53353;
+        private int _serverPort = DEFAULT_SERVER_PORT;
+
+        public int ServerPort
+        {
+            get => _serverPort;
+            set 
+            {
+                int p = value;
+                if (p < 0 || p > 65535)
+                {
+                    p = DEFAULT_SERVER_PORT;
+                }
+                SetProperty(ref _serverPort, p); 
+            }
+        }
+
+
+
         public string[,] GridSoundClipIds = new string[5, 5];
 
         private string _language = ""; // Start blank, so that system language can be attempted first

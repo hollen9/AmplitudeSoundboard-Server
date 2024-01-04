@@ -45,6 +45,7 @@
     <PackageReference Include="ManagedBass.Fx" Version="3.1.1" />
     <PackageReference Include="ManagedBass.Mix" Version="3.1.1" />
     <PackageReference Include="ManagedBass.Opus" Version="3.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.25" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <ItemGroup>
@@ -136,11 +137,11 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </Content>
-			<Content Include="$(ProjectDir)Libraries\BASS\Windows\bass_fx.dll">
-					<Link>bass_fx.dll</Link>
-					<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-					<CopyToPublishDirectory>Always</CopyToPublishDirectory>
-			</Content>
+		<Content Include="$(ProjectDir)Libraries\BASS\Windows\bass_fx.dll">
+				<Link>bass_fx.dll</Link>
+				<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+				<CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		</Content>
   </ItemGroup>
   <!--MacOS-->
   <ItemGroup Condition="'$(RuntimeIdentifier)' == 'osx-x64'">
@@ -164,6 +165,11 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </Content>
+		<Content Include="$(ProjectDir)Libraries\BASS\MacOS\libbass_fx.dylib">
+				<Link>bass_fx.dylib</Link>
+				<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+				<CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		</Content>
   </ItemGroup>
   <!--Linux-->
   <ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
@@ -197,6 +203,11 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </Content>
+		<Content Include="$(ProjectDir)Libraries\BASS\Linux\libbass_fx.so">
+				<Link>libbass_fx.so</Link>
+				<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+				<CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		</Content>
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">

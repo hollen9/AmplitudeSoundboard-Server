@@ -26,8 +26,10 @@ using System.Runtime.CompilerServices;
 
 namespace Amplitude.Models
 {
-    public class PlayingClip : INotifyPropertyChanged
+    public class PlayingClip : BaseNotifyObject// : INotifyPropertyChanged
     {
+
+
         public string Name { get; init; }
         public string OutputDevice { get; init; }
         public double Length { get; init; }
@@ -40,15 +42,57 @@ namespace Amplitude.Models
         public bool IsExclusiveMusic
         {
             get => _isExclusiveMusic;
-            set
-            {
-                if (value !=  _isExclusiveMusic) 
-                {
-                    _isExclusiveMusic = value;
-                    OnPropertyChanged(nameof(IsExclusiveMusic));
-                }
-            }
+            set => SetProperty(ref _isExclusiveMusic, value);
         }
+
+        private float _pitch = 0;
+
+        public float Pitch
+        {
+            get => _pitch = 0;
+            set => SetProperty(ref _pitch, value);
+        }
+        private int _volume = 100;
+
+        public int RawVolume
+        {
+            get => _volume;
+            set => SetProperty(ref _volume, value);
+        }
+
+        private int _tempo = 0;
+
+        public int Tempo
+        {
+            get => _tempo;
+            set => SetProperty(ref _tempo, value);
+        }
+        private string _filepath = string.Empty;
+        public string FilePath
+        {
+            get => _filepath;
+            set => SetProperty(ref _filepath, value);
+        }
+
+        private string _outputDeviceName = "";
+
+        public string OutputDeviceName
+        {
+            get => _outputDeviceName;
+            set => SetProperty(ref _outputDeviceName, value);
+        }
+
+        private int _outputVolume;
+
+        public int OutputVolumeMultiplier
+        {
+            get => _outputVolume;
+            set => SetProperty(ref _outputVolume, value);
+        }
+
+
+
+
 
         private double _currentPos = 0;
         public double CurrentPos
@@ -94,10 +138,10 @@ namespace Amplitude.Models
             LoopClip = loopClip;
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        public virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        //public event PropertyChangedEventHandler? PropertyChanged;
+        //public virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        //{
+        //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        //}
     }
 }
