@@ -116,8 +116,8 @@
 														<TextBlock Grid.Column="1" VerticalAlignment="Center" Text="Stop Server"/>
 												</Grid>
 												<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto">
-														<TextBlock Grid.Column="0" VerticalAlignment="Center" Text="Server: "/>
-														<TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding ServerStatus}"/>
+														<!--<TextBlock Grid.Column="0" VerticalAlignment="Center" Text="SV: "/>-->
+														<TextBlock FontSize="9" Grid.Column="1" VerticalAlignment="Center" Text="{Binding ServerStatus}"/>
 												</Grid>
 										</StackPanel>
 

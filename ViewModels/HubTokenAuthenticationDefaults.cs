@@ -21,7 +21,9 @@
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -51,6 +53,7 @@ namespace Amplitude.ViewModels
     public class HubTokenAuthenticationHandler : AuthenticationHandler<HubTokenAuthenticationOptions>
     {
         public IServiceProvider ServiceProvider { get; set; }
+        private readonly Models.Options _appOptions;
 
         public HubTokenAuthenticationHandler(
           IOptionsMonitor<HubTokenAuthenticationOptions> options,
@@ -61,22 +64,28 @@ namespace Amplitude.ViewModels
           : base(options, logger, encoder, clock)
         {
             ServiceProvider = serviceProvider;
+            _appOptions = ServiceProvider.GetRequiredService<Models.Options>();
         }
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             // get access token from header (authorization: bearer <token>)
             var token = Request.Headers["Authorization"].ToString().Replace("bearer ", "", StringComparison.OrdinalIgnoreCase);
-            
+            token = token.Trim();
             // implement logic to authenticate
-            if (!string.IsNullOrWhiteSpace(token) && token.Equals("wakka5353wakkaop"))
+            if (string.IsNullOrWhiteSpace(token)) 
+            {
+                return Task.FromResult(AuthenticateResult.Fail("No access token provided."));
+            }
+            if (_appOptions.ServerApiKeys.Any(x => x.ApiKey.Trim() == token))
             {
                 var claims = new[] { new Claim("token", token) };
                 var identity = new ClaimsIdentity(claims, nameof(HubTokenAuthenticationHandler));
                 var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), Scheme.Name);
                 return Task.FromResult(AuthenticateResult.Success(ticket));
             }
-            return Task.FromResult(AuthenticateResult.Fail("No access token provided."));
+
+            return Task.FromResult(AuthenticateResult.Fail("No access token provided, or rejected."));
         }
     }
 

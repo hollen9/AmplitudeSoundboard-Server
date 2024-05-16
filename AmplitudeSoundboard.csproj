@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+			<!--<RuntimeIdentifier>linux-x64</RuntimeIdentifier>-->
   </PropertyGroup>
   <PropertyGroup>
     <DefineConstants Condition="'$(RuntimeIdentifier)' == 'win-x64'">$(DefineConstants);Windows</DefineConstants>
@@ -208,6 +209,11 @@
 				<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 				<CopyToPublishDirectory>Always</CopyToPublishDirectory>
 		</Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="advancedSettings.jsonc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">

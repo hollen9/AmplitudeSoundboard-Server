@@ -34,9 +34,25 @@ namespace Amplitude.Hubs
     {
         public async Task SendMessage(string user, string message, string fullpath, float pitch = 0f, int volume = 100, int tempo = 0, bool isExclusiveMusic = false, bool isLoop = false)
         {
+            string fullpath_alt;
+            if (!File.Exists(fullpath))
+            {
+                fullpath_alt = fullpath.Replace(".mp3", ".vsnd_c");
+                if (!File.Exists(fullpath_alt))
+                {
+                    App.WindowManager.ShowErrorString("File not found (no mp3 or vsnd_c): " + fullpath);
+                    return;
+                }
+            }
+            else
+            {
+                fullpath_alt = fullpath;
+            }
+
+
             var sc = new SoundClip();
-            sc.Name = user + ":" + Path.GetFileName(fullpath);
-            sc.AudioFilePath = fullpath;
+            sc.Name = user + ":" + Path.GetFileName(fullpath_alt);
+            sc.AudioFilePath = fullpath_alt;
             sc.OutputProfileId = "DEFAULT";
             sc.Volume = volume;
             sc.IsExclusiveMusic = isExclusiveMusic;

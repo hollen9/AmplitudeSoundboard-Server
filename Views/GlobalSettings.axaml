@@ -226,8 +226,7 @@
 								<SolidColorBrush Color="{Binding ThemeHandler.BorderColor}"/>
 						</Border.BorderBrush>
 						<StackPanel>
-								<Label Content="{i18n:Localize SignalRSettingsLabel}" HorizontalAlignment="Center" Height="30"></Label>
-
+								<Label Content="SignalR Server Settings" HorizontalAlignment="Center" Height="30"></Label>
 								<Grid ColumnDefinitions="*,Auto">
 										<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
 												<!--<Label Content="{i18n:Localize SignalRServerLabel}" VerticalAlignment="Center"></Label>-->
@@ -238,6 +237,53 @@
 										</StackPanel>
 										<TextBox Grid.Column="1" Margin="0,5,0,5" Text="{Binding Model.ServerPort}" HorizontalAlignment="Center"></TextBox>
 								</Grid>
+                <Grid ColumnDefinitions="*,Auto">
+										<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+												<!--<Label Content="{i18n:Localize SignalRServerLabel}" VerticalAlignment="Center"></Label>-->
+												<Label Content="SignalR Server Address" VerticalAlignment="Center"></Label>
+												<Panel>
+														<Image Height="20" VerticalAlignment="Center" />
+												</Panel>
+										</StackPanel>
+										<TextBox Grid.Column="1" Margin="0,5,0,5" Text="{Binding Model.ServerIp}" HorizontalAlignment="Center"></TextBox>
+								</Grid>
+								
+								<Label Content="SignalR Server ApiKeys" HorizontalAlignment="Center" Height="30"></Label>
+								<StackPanel Orientation="Horizontal">
+										<Button Content="Add" Command="{Binding AddApiKeyCommand}" Margin="5" />
+										<Button Content="Remove" Command="{Binding RemoveApiKeyCommand}" Margin="5" />
+								</StackPanel>
+								<ListBox SelectionMode="Multiple,Toggle" ItemsSource="{Binding Model.ServerApiKeys}" Selection="{Binding ApiKeysSelection}">
+										<ListBox.ItemTemplate>
+												<DataTemplate>
+														<Grid ColumnDefinitions="1*,2*,3*,2*">
+																<TextBox Grid.Column="1" Text="{Binding Note}" Margin="10,0"/>
+																<TextBox Grid.Column="2" IsReadOnly="True" Text="{Binding ApiKey}" Margin="10,0"/>
+																<TextBlock Grid.Column="3" Text="{Binding CreatedTime}" Margin="10,0"/>
+														</Grid>
+												</DataTemplate>
+										</ListBox.ItemTemplate>
+								</ListBox>
+								
+								<!--<Grid ColumnDefinitions="*,Auto">
+										--><!-- GridView to manage ApiKeys {ApiKey:string, Note:string} with add and remove button--><!--
+										<ListView Grid.ColumnSpan="2" ItemsSource="{Binding Model.ApiKeys}">
+												<ListView.ItemTemplate>
+														<DataTemplate>
+																<Grid>
+																		<Grid.ColumnDefinitions>
+																				<ColumnDefinition Width="*" />
+																				<ColumnDefinition Width="Auto" />
+																		</Grid.ColumnDefinitions>
+																		<TextBox Grid.Column="0" Text="{Binding ApiKey}" Margin="0,5,5,5" />
+																		<TextBox Grid.Column="1" Text="{Binding Note}" Margin="5" />
+																</Grid>
+														</DataTemplate>
+												</ListView.ItemTemplate>
+										</ListView>
+										<Button Grid.Column="1" Content="Add" Command="{Binding AddApiKeyCommand}" Margin="5" />
+										<Button Grid.Column="1" Content="Remove" Command="{Binding RemoveApiKeyCommand}" Margin="5" />
+								</Grid>-->
 						</StackPanel>
 				</Border>
 									

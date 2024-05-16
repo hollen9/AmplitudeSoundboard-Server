@@ -37,8 +37,8 @@ using System;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Extensions.Options;
-
-
+using System.Net;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Amplitude.ViewModels
 {
@@ -114,11 +114,11 @@ namespace Amplitude.ViewModels
             {
                 if (Host != null)
                 {
-                    return "On @Port: " + OptionsManager.Instance.Options.ServerPort;//Localization.Localizer.Instance["ServerRunning"];
+                    return $"http://{OptionsManager.Instance.Options.ServerIp}:{OptionsManager.Instance.Options.ServerPort}";//Localization.Localizer.Instance["ServerRunning"];
                 }
                 else
                 {
-                    return "Off";//Localization.Localizer.Instance["ServerStopped"];
+                    return "Server Off";//Localization.Localizer.Instance["ServerStopped"];
                 }
             }
         }
@@ -140,99 +140,84 @@ namespace Amplitude.ViewModels
 
         public async Task ServerStart()
         {
-            Host?.Dispose();
-            Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
-                .ConfigureWebHostDefaults(webBuilder => webBuilder
-                    .UseUrls("http://localhost:" + OptionsManager.Instance.Options.ServerPort)
-                    .ConfigureServices(services =>
-                        {
 
-                            services.AddAuthentication(opt =>
-                            {
-                                opt.DefaultAuthenticateScheme = HubTokenAuthenticationDefaults.AuthenticationScheme;
-                                opt.DefaultChallengeScheme = HubTokenAuthenticationDefaults.AuthenticationScheme;
-                            }).AddHubTokenAuthenticationScheme();
+            try
+            {
+                Host?.Dispose();
+                Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
+                    .ConfigureWebHostDefaults(webBuilder => webBuilder
+                        //.UseUrls($"http://{OptionsManager.Instance.Options.ServerIp}:" + OptionsManager.Instance.Options.ServerPort)
 
-                            services.AddAuthorization(options =>
-                            {
-                                options.AddPolicy("SignalRPolicy", pol => pol.Requirements.Add(new HubRequirement()));
-                            });
+                        // TO DO: 我加入了 UseKestrel 就會沒辦法連，不知道原因是什麼
+                        //.UseKestrel(options => //Kestral will override the default UseUrls's port
+                        //{
+                        //    // Default port
+                        //    options.ListenLocalhost(OptionsManager.Instance.Options.ServerPort,
+                        //        c =>
+                        //        {
+                        //            c.UseHub<SaysoundHub>();
+                        //        });
 
-                            services.AddSignalR(opt => 
+                        //    //options.Listen(IPAddress.IPv6Any, 5000);
+
+                        //    // Hub bound to TCP end point
+                        //    options.Listen(IPAddress.Any, OptionsManager.Instance.Options.ServerPort, builder =>
+                        //    {
+                        //        builder.UseHub<SaysoundHub>();
+                        //    });
+                        //})
+                        //.UseKestrel()
+                        .UseUrls($"http://{OptionsManager.Instance.Options.ServerIp}:" + OptionsManager.Instance.Options.ServerPort)
+                        .ConfigureServices(services =>
                             {
+                                services.AddSingleton<Models.Options>(this.OptionsManager.Options);
+                                services.AddAuthentication(opt =>
+                                {
+                                    opt.DefaultAuthenticateScheme = HubTokenAuthenticationDefaults.AuthenticationScheme;
+                                    opt.DefaultChallengeScheme = HubTokenAuthenticationDefaults.AuthenticationScheme;
+                                }).AddHubTokenAuthenticationScheme();
+
+                                services.AddAuthorization(options =>
+                                {
+                                    options.AddPolicy("SignalRPolicy", pol => pol.Requirements.Add(new HubRequirement()));
+                                });
+
+                                services.AddSignalR(opt =>
+                                {
 #if DEBUG
                                 opt.EnableDetailedErrors = true;
 #endif
-                            });
-                            //services.AddAuthentication(options =>
-                            //{
-                            //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                            //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                            //}).AddJwtBearer(options => 
-                            //{
-                            //    options.RequireHttpsMetadata = false;
-                            //    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-                            //    {
-                            //        ValidateIssuer = false,
-                            //        //ValidIssuer = "AmplitudeSoundboardServer",
-                            //        ValidateAudience = false,
-                            //        // ValidAudience = "AmplitudeSoundboardClient",
-                            //        ValidateLifetime = false, // 永久有效
-                            //        ClockSkew = TimeSpan.Zero, // 時間偏移
-                            //        ValidateIssuerSigningKey = true,
-                            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("wakka5353wakkaop")), // 金鑰
-
-                            //    };
-                            //    options.Events = new JwtBearerEvents
-                            //    {
-                            //        OnMessageReceived = context =>
-                            //        {
-                            //            // Extract accessToken from Header (Bearer)
-                            //            var accessToken = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-                            //            var path = context.HttpContext.Request.Path;
-                            //            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/hubs")))
-                            //            {
-                            //                context.Token = accessToken;
-                            //            }
-                            //            return Task.CompletedTask;
-                            //        },
-                            //        OnAuthenticationFailed = context =>
-                            //        {
-                            //            var te = context.Exception;
-                            //            return Task.CompletedTask;
-                            //        },
-                            //        OnChallenge = context =>
-                            //        {
-
-                            //            var te = context.AuthenticateFailure;
-                            //            return Task.CompletedTask;
-                            //        },
-                            //        OnForbidden = context =>
-                            //        {
-                            //            var te = context.Result;
-                            //            return Task.CompletedTask;
-                            //        },
-                            //    };
-                            //});
-                        }
-                        )
-                    .Configure(app =>
-                    {
-                        app.UseRouting();
-                        
-                        app.UseAuthentication();
-                        app.UseAuthorization();
-
-                        app.UseEndpoints(endpoints => 
+                                });
+                            }
+                            )
+                        .Configure(app =>
                         {
-                            endpoints.MapHub<SaysoundHub>("/hubs/saysoundHub",
-                                options => options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets);
-                        });
-                    }))
-               .Build();
+                            app.UseRouting();
 
-            await Host.StartAsync();
-            OnPropertyChanged(nameof(ServerStatus));
+                            app.UseAuthentication();
+                            app.UseAuthorization();
+
+                            app.UseEndpoints(endpoints =>
+                            {
+                                endpoints.MapHub<SaysoundHub>("/hubs/saysoundHub",
+                                    options => options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets);
+                            });
+
+                            //app.UseEndpoints(endpoints =>
+                            //{
+                            //    endpoints.MapHub<SaysoundHub>("/hubs/saysoundHub");
+                            //});
+                        }))
+                   .Build();
+
+                await Host.StartAsync();
+                OnPropertyChanged(nameof(ServerStatus));
+            }
+            catch (Exception ex)
+            {
+                AmplitudeSoundboard.App.WindowManager.ShowErrorString(ex.Message);
+                throw;
+            }
         }
 
         public async Task ServerStop()

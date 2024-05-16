@@ -20,26 +20,65 @@
 */
 
 using Avalonia;
+using Avalonia.Media;
 using Avalonia.ReactiveUI;
+using Microsoft.Extensions.Configuration;
 using System.Net.NetworkInformation;
 
 namespace AmplitudeSoundboard
 {
     class Program
     {
+        public class AdvancedSettings
+        {
+            public bool Disabled { get; set; }
+            public string Font { get; set; }
+        }
+        
         // Initialization code. Don't use any Avalonia, third-party APIs or any
         // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
         // yet and stuff might break.
         public static void Main(string[] args)
         {
-            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args, Avalonia.Controls.ShutdownMode.OnMainWindowClose);
+            // Read advanced settings
+            string jsonFilename = "advancedSettings.json";
+            if (System.IO.File.Exists("advancedSettings.jsonc"))
+            {
+                jsonFilename = "advancedSettings.jsonc";
+            }
+            var advSettings = new AdvancedSettings();
+            if (System.IO.File.Exists(jsonFilename))
+            {
+                // use ConfigurationBuilder to read settings
+                var config = new ConfigurationBuilder()
+                    .AddJsonFile(jsonFilename)
+                    .Build();
+                config.Bind("advancedSettings", advSettings);
+                if (advSettings.Disabled)
+                {
+                    advSettings = null;
+                }
+            }
+            BuildAvaloniaApp(advSettings).StartWithClassicDesktopLifetime(args, Avalonia.Controls.ShutdownMode.OnMainWindowClose);
         }
 
         // Avalonia configuration, don't remove; also used by visual designer.
-        public static AppBuilder BuildAvaloniaApp()
-            => AppBuilder.Configure<App>()
+        public static AppBuilder BuildAvaloniaApp(AdvancedSettings advSettings)
+        {
+            var app = AppBuilder.Configure<App>()
                 .UsePlatformDetect()
                 .LogToTrace()
                 .UseReactiveUI();
+
+            if (advSettings?.Font != null)
+            {
+                app.With(new FontManagerOptions
+                {
+                    DefaultFamilyName = advSettings.Font
+                });
+            }
+            
+            return app;
+        }
     }
 }

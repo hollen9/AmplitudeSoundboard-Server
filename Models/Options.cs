@@ -22,33 +22,77 @@
 using Amplitude.Localization;
 using Newtonsoft.Json;
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Amplitude.Models
 {
-    public class Options : INotifyPropertyChanged
+    public class ApiKeyInfo : BaseNotifyObject
     {
-        /// <summary>
-        /// SetProperty
-        /// </summary>
-        private void SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        public ApiKeyInfo()
         {
-            if (value == null)
+            CreatedTime = DateTimeOffset.Now;
+            // USE SHA512 to generate a random APIKEY string
+            Note = "Untitled";
+            string salt = "tyopf$@389641faqeQe";
+            using (var rng = RandomNumberGenerator.Create())
             {
-                throw new ArgumentNullException(nameof(value));
-            }
+                var bytes = new byte[64]; // 64 bytes = 512 bits
+                rng.GetBytes(bytes);
 
-            if (field == null || !field.Equals(value))
-            {
-                field = value;
-                OnPropertyChanged(propertyName);
+                // Combine salt and random bytes
+                byte[] dataToHash = Encoding.UTF8.GetBytes(salt + Convert.ToBase64String(bytes));
+
+                using (var sha512 = SHA512.Create())
+                {
+                    var hashBytes = sha512.ComputeHash(dataToHash);
+                    string key = Convert.ToBase64String(hashBytes);
+                    ApiKey = key;
+                }
             }
         }
+        private string _apiKey;
 
+        public string ApiKey
+        {
+            get => _apiKey;
+            set => SetProperty(ref _apiKey, value);
+        }
+        private string _note;
 
+        public string Note
+        {
+            get => _note;
+            set => SetProperty(ref _note, value);
+        }
+
+        private DateTimeOffset _createdTime;
+
+        public DateTimeOffset CreatedTime
+        {
+            get => _createdTime;
+            set => SetProperty(ref _createdTime, value);
+        }
+
+    }
+
+    public class Options : BaseNotifyObject// : INotifyPropertyChanged
+    {
+        private ObservableCollection<ApiKeyInfo> _serverApiKeys = new();
+
+        public ObservableCollection<ApiKeyInfo> ServerApiKeys
+        {
+            get => _serverApiKeys;
+            set => SetProperty(ref _serverApiKeys, value);
+        }
 
         public const int DEFAULT_SERVER_PORT = 53353;
+        public const string DEFAULT_SERVER_IP = "127.0.0.1";
+        public const bool DEFAULT_USE_HTTPS = false;
         private int _serverPort = DEFAULT_SERVER_PORT;
 
         public int ServerPort
@@ -64,6 +108,21 @@ namespace Amplitude.Models
                 SetProperty(ref _serverPort, p); 
             }
         }
+        private string _serverIp = DEFAULT_SERVER_IP;
+
+        public string ServerIp
+        {
+            get => _serverIp;
+            set => SetProperty(ref _serverIp, value);
+        }
+        private bool _useHttps = DEFAULT_USE_HTTPS;
+
+        public bool UseHttps
+        {
+            get => _useHttps;
+            set => SetProperty(ref _useHttps, value);
+        }
+
 
 
 

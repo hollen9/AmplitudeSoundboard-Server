@@ -21,13 +21,20 @@
 
 using Amplitude.Helpers;
 using Amplitude.Models;
+using Avalonia.Controls.Selection;
 using Avalonia.Media;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
 namespace Amplitude.ViewModels
 {
     public sealed class GlobalSettingsViewModel : ViewModelBase
     {
+        
         private Options _model;
         public Options Model { get => _model; }
         public static string[] Languages { get => Localization.Localizer.Languages.Keys.ToArray(); }
@@ -36,6 +43,8 @@ namespace Amplitude.ViewModels
         {
             _model = OptionsManager.Options.ShallowCopy();
             Model.PropertyChanged += Model_PropertyChanged;
+            ApiKeysSelection = new();
+            ApiKeysSelection.SingleSelect = false;
         }
 
         private void Model_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -53,6 +62,18 @@ namespace Amplitude.ViewModels
                 return !WaitingForHotkey;
             }
         }
+
+        public SelectionModel<ApiKeyInfo> ApiKeysSelection { get; set; }
+
+        //private ObservableCollection<ApiKeyInfo> _selectedApiKeys;
+
+        //public ObservableCollection<ApiKeyInfo> SelectedApiKeys
+        //{
+        //    get => _selectedApiKeys;
+        //    set => SetProperty(ref _selectedApiKeys, value);
+        //}
+
+
 
         private bool _waitingForHotkey;
         public bool WaitingForHotkey
@@ -89,6 +110,23 @@ namespace Amplitude.ViewModels
         public void ClearPositions()
         {
             WindowManager.ClearWindowSizesAndPositions();
+        }
+
+
+        //public ObservableCollection<ApiKeyInfo> ApiKeys { get; set; }
+
+        public void AddApiKeyCommand()
+        {
+            Model.ServerApiKeys.Add(new ApiKeyInfo());
+        }
+
+        public void RemoveApiKeyCommand()
+        {
+            if (ApiKeysSelection.SelectedItems == null || ApiKeysSelection.SelectedItems.Count == 0)
+            {
+                return;
+            }
+            ApiKeysSelection.SelectedItems.ToList().ForEach(x => Model.ServerApiKeys.Remove(x));
         }
 
         public override void Dispose()
