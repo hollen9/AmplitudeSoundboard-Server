@@ -24,6 +24,7 @@ using AmplitudeSoundboard;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -32,7 +33,7 @@ namespace Amplitude.Hubs
     [Authorize("SignalRPolicy")]
     public class SaysoundHub : Hub
     {
-        public async Task SendMessage(string user, string message, string fullpath, float pitch = 0f, int volume = 100, int tempo = 0, bool isExclusiveMusic = false, bool isLoop = false)
+        public async Task SendMessage(string user, string message, string fullpath, float pitch = 0f, int volume = 100, int tempo = 0, bool isExclusiveMusic = false, bool isLoop = false, DateTimeOffset? clientSendTime = null)
         {
             string fullpath_alt;
             if (!File.Exists(fullpath))
@@ -57,6 +58,7 @@ namespace Amplitude.Hubs
             sc.Volume = volume;
             sc.IsExclusiveMusic = isExclusiveMusic;
             sc.LoopClip = isLoop;
+            sc.ClientSendTime = clientSendTime;
 
             if (isExclusiveMusic) 
             {
@@ -93,14 +95,27 @@ namespace Amplitude.Hubs
             }
         }
 
-        public void StopExclusiveMusic()
+        public void StopExclusiveMusic(DateTimeOffset? clientSenTime = null)
         {
             for (int i = App.SoundEngine.CurrentlyPlaying.Count - 1; i >= 0; i--)
             {
+                
                 var clip = App.SoundEngine.CurrentlyPlaying[i];
                 if (clip.IsExclusiveMusic)
                 {
-                    clip.StopPlayback();
+                    if (clientSenTime.HasValue && clip.ClientSendTime.HasValue)
+                    {
+                        if (clip.ClientSendTime.Value <= clientSenTime.Value)
+                        {
+                            clip.StopPlayback();
+                            continue;
+                        }
+                        continue;
+                    }
+                    else
+                    {
+                        clip.StopPlayback();
+                    }
                 }
             }
         }

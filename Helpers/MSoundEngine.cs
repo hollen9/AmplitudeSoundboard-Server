@@ -174,11 +174,11 @@ namespace Amplitude.Helpers
 
             foreach (OutputSettings settings in source.OutputSettingsFromProfile)
             {
-                Play(source.AudioFilePath, settings.Volume, source.Volume, settings.DeviceName, source.LoopClip, source.Name, pitch, tempo, source.IsExclusiveMusic);
+                Play(source.AudioFilePath, settings.Volume, source.Volume, settings.DeviceName, source.LoopClip, source.Name, pitch, tempo, source.IsExclusiveMusic, source.ClientSendTime);
             }
         }
 
-        public void Play(string fileName, int volume, int volumeMultiplier, string playerDeviceName, bool loopClip, string? name = null, float pitch = 0f, int tempo = 0, bool isExclusiveMusic = false)
+        public void Play(string fileName, int volume, int volumeMultiplier, string playerDeviceName, bool loopClip, string? name = null, float pitch = 0f, int tempo = 0, bool isExclusiveMusic = false, DateTimeOffset? clientSendTime = null)
         {
             double vol = (volume / 100.0) * (volumeMultiplier / 100.0);
 
@@ -251,7 +251,8 @@ namespace Amplitude.Helpers
                             var len = Bass.ChannelGetLength(stream_fx_tempo, PositionFlags.Bytes);
                             double length = Bass.ChannelBytes2Seconds(stream_fx_tempo, len);
                             PlayingClip track = new PlayingClip(name ?? Path.GetFileNameWithoutExtension(fileName) ?? "", playerDeviceName, stream_fx_tempo, length, loopClip);
-                            
+
+                            track.ClientSendTime = clientSendTime;
                             track.IsExclusiveMusic = isExclusiveMusic;
                             track.Pitch = pitch;
                             track.Tempo = tempo;

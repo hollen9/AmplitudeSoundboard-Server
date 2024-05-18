@@ -44,6 +44,14 @@ namespace Amplitude.Models
             get => _isExclusiveMusic;
             set => SetProperty(ref _isExclusiveMusic, value);
         }
+        private DateTimeOffset? _clientSendTime;
+
+        public DateTimeOffset? ClientSendTime
+        {
+            get => _clientSendTime;
+            set => SetProperty(ref _clientSendTime, value);
+        }
+
 
         private float _pitch = 0;
 

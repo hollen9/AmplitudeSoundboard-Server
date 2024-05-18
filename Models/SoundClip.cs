@@ -121,6 +121,21 @@ namespace Amplitude.Models
             }
         }
 
+        private DateTimeOffset? _clientSendTime;
+
+        public DateTimeOffset? ClientSendTime
+        {
+            get { return _clientSendTime; }
+            set 
+            {
+                if (value != _clientSendTime) {
+                    _clientSendTime = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+
         private int _volume = 100;
         public int Volume
         {
