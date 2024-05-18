@@ -28,7 +28,7 @@
         x:Class="Amplitude.Views.MainWindow"
         xmlns:local="clr-namespace:Amplitude.Views"
         Icon="/Assets/Icon.ico"
-        Title="Amplitude Soundboard"
+        Title="Hamplitude Saysound Server"
         MinWidth="450" MinHeight="300"
         Width="725" Height="625"
         TransparencyLevelHint="AcrylicBlur"
@@ -61,7 +61,7 @@
 				<ExperimentalAcrylicBorder x:Name="Acrylic" IsHitTestVisible="False" Material="{Binding ThemeHandler.Acrylic}">
 				</ExperimentalAcrylicBorder>
 
-				<TextBlock IsVisible="{Binding CanUseCustomTitlebar}" FontFamily="{Binding ThemeHandler.TitleFont}" Classes="TITLE" Text="Amplitude Soundboard" FontWeight="Bold" Margin="10,10,10,10" HorizontalAlignment="Center" IsHitTestVisible="False" ></TextBlock>
+				<TextBlock IsVisible="{Binding CanUseCustomTitlebar}" FontFamily="{Binding ThemeHandler.TitleFont}" Classes="TITLE" Text="Hamplitude Saysound Server" FontWeight="Bold" Margin="10,10,10,10" HorizontalAlignment="Center" IsHitTestVisible="False" ></TextBlock>
 
 				<Grid RowDefinitions="*,Auto,Auto" Margin="5,30,5,0" >
 						<Grid Grid.Row="0" ColumnDefinitions="Auto,*">
