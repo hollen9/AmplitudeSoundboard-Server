@@ -163,23 +163,25 @@ namespace AmplitudeSoundboard
 
         private async void CheckForUpdates()
         {
-            try
-            {
-                HttpResponseMessage response = await new HttpClient().GetAsync(VERSION_CHECK_URL);
-                response.EnsureSuccessStatusCode();
-                string newVer = await response.Content.ReadAsStringAsync();
-                newVer = newVer.Trim();
-                if (!string.IsNullOrEmpty(newVer) && newVer != VERSION.Trim())
-                {
-                    UpdatePrompt updateDialog = new UpdatePrompt(newVer);
-                    updateDialog.Show();
-                    updateDialog.Activate();
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e);
-            }
+            // Disabled Auto Update for now
+
+            //try
+            //{
+            //    HttpResponseMessage response = await new HttpClient().GetAsync(VERSION_CHECK_URL);
+            //    response.EnsureSuccessStatusCode();
+            //    string newVer = await response.Content.ReadAsStringAsync();
+            //    newVer = newVer.Trim();
+            //    if (!string.IsNullOrEmpty(newVer) && newVer != VERSION.Trim())
+            //    {
+            //        UpdatePrompt updateDialog = new UpdatePrompt(newVer);
+            //        updateDialog.Show();
+            //        updateDialog.Activate();
+            //    }
+            //}
+            //catch (Exception e)
+            //{
+            //    Debug.WriteLine(e);
+            //}
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
