@@ -1,9 +1,12 @@
 Basically the same software, but with SignalR and BassFX support that enable you play sounds with tweaked pitch and tempo effects.
 Auto update is disabled. (code commented out)
 
+The macOS version has not been tested at the moment.
+
 # To do
 1. Log who played what sound
 2. UI: Let user play certain sound by typing commands. (with custom mapping)
+3. bassFx binary for macOS
 
 # How to build
 1. Modify RuntimeIdentifier in `AmplitudeSoundboard.csproj`,
